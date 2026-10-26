@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Guild {
+  id        String   @id
+  name      String
+  createdAt DateTime @default(now())
+  settings  Json?
+  members   Member[]
+  sanctions Sanction[]
+}
+
+model Member {
+  id        String   @id
+  guildId   String
+  userId    String
+  warnings  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  guild Guild @relation(fields: [guildId], references: [id])
+
+  @@unique([guildId, userId])
+  @@index([guildId])
+}
+
+model Sanction {
+  id          String    @id @default(cuid())
+  guildId     String
+  userId      String
+  moderatorId String
+  type        String
+  reason      String?
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  guild Guild @relation(fields: [guildId], references: [id])
+
+  @@index([guildId, userId])
+  @@index([expiresAt])
+}
