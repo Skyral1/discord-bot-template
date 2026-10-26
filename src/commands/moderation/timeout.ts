@@ -1,7 +1,8 @@
 import {
   SlashCommandBuilder,
   ChatInputCommandInteraction,
-  PermissionFlagsBits
+  PermissionFlagsBits,
+  GuildMember
 } from 'discord.js';
 
 export const data = new SlashCommandBuilder()
@@ -28,11 +29,19 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   const member = interaction.options.getMember('membre');
+
+  if (!(member instanceof GuildMember)) {
+    return interaction.reply({
+      content: 'Je ne peux pas appliquer un timeout à ce membre.',
+      ephemeral: true
+    });
+  }
+
   const duration = interaction.options.getInteger('duree', true);
   const reason =
     interaction.options.getString('raison') ?? 'Aucune raison fournie';
 
-  if (!member?.moderatable) {
+  if (!member.moderatable) {
     return interaction.reply({
       content: 'Je ne peux pas appliquer un timeout à ce membre.',
       ephemeral: true
